@@ -14,7 +14,10 @@ document.querySelector('form').addEventListener('submit', function (ev) {
     document.getElementById('requesting').innerHTML= "Requesting.....";
     fetch('http://localhost:5000/extension', {
         method: 'POST',
-        body: ValeContainer.value
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify(formData)
     })
     .then(function (res) {
         console.log(res);
