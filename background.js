@@ -7,18 +7,19 @@ var context_menu ={
 chrome.contextMenus.removeAll(function() {
     chrome.contextMenus.create(context_menu);
     });
-
+var isloading =false;
 chrome.contextMenus.onClicked.addListener((clickdata)=>{
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         tabid = tabs[0].id;  
         console.log(tabid);
-        
-        var port = chrome.tabs.connect(tabid, {name:"tester"}); 
         var formData = {
             url: clickdata.pageUrl
         };
+        if (!isloading){
+        var port = chrome.tabs.connect(tabid, {name:"tester"}); 
         console.log("Requesting.....");
         port.postMessage({mes:"Requesting....."});
+        isloading =true;
         fetch('http://localhost:5000/extension', {
             method: 'POST',
             headers:{
@@ -42,6 +43,7 @@ chrome.contextMenus.onClicked.addListener((clickdata)=>{
             }
             console.log("Completed");
             port.postMessage({mes:"Completed"});
+            isloading =false;
             setTimeout(() => {
                 chrome.tabs.create({ url: json.url});  
             }, 1000);
@@ -49,9 +51,11 @@ chrome.contextMenus.onClicked.addListener((clickdata)=>{
         .catch(function(error){
             console.log(error.message);
             port.postMessage({mes:error.message});
+            isloading =false;
             port.onDisconnect.addListener(console.log("disconnected"));
             
         });
+    }
         
     });
 });
